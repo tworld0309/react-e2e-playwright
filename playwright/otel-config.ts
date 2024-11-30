@@ -1,23 +1,17 @@
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 
-// Enable OpenTelemetry debugging logs (optional)
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
-
-// Initialize Tracer Provider
-const provider = new NodeTracerProvider();
-
-// Configure OTLP HTTP Exporter
-const exporter = new OTLPTraceExporter({
+// Set up OpenTelemetry
+const tracerProvider = new NodeTracerProvider();
+const traceExporter = new OTLPTraceExporter({
   url: 'http://localhost:4318/v1/traces', // OpenTelemetry Collector endpoint
 });
 
-// Add Span Processor
-provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
+tracerProvider.register();
 
-// Register the provider globally
-provider.register();
+const tracer = trace.getTracer('playwright-tests');
 
 console.log('OpenTelemetry initialized');

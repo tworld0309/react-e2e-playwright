@@ -17,9 +17,9 @@ receivers:
 
 exporters:
   prometheusremotewrite:
-    endpoint: "http://localhost:9090/api/v1/write" # Prometheus Remote Write API
+    endpoint: "http://prometheus:9090/api/v1/write" # Prometheus Remote Write API
   otlphttp:
-    endpoint: "http://localhost:3100/loki/api/v1/push" # Loki HTTP Push API
+    endpoint: "http://loki:3100/loki/api/v1/push" # Loki HTTP Push API
 
 processors:
   batch:
@@ -35,9 +35,9 @@ service:
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [batch, memory_limiter]
+      processors: [memory_limiter]
       exporters: [otlphttp]
     metrics:
       receivers: [hostmetrics]
-      processors: [batch, memory_limiter]
+      processors: [memory_limiter]
       exporters: [prometheusremotewrite]
