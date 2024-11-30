@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import './otel-config';
+
+
 export default defineConfig({
   projects: [
     {

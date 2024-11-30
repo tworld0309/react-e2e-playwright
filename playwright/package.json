@@ -1,5 +1,10 @@
 {
   "devDependencies": {
     "@playwright/test": "^1.49.0"
+  },
+  "dependencies": {
+    "@opentelemetry/exporter-trace-otlp-http": "^0.55.0",
+    "@opentelemetry/instrumentation": "^0.55.0",
+    "@opentelemetry/sdk-node": "^0.55.0"
   }
 }

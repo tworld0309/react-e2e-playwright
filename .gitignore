@@ -10,6 +10,8 @@ lerna-debug.log*
 react-app/node_modules
 playwright/node_modules
 playwright/test-results
+docker/data
+docker/wal
 test-results
 dist
 dist-ssr

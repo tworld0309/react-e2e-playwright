@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  # # Playwright 실행 컨테이너
+  # playwright:
+  #   image: mcr.microsoft.com/playwright:v1.37.1
+  #   container_name: playwright
+  #   volumes:
+  #     - ./tests:/tests # 테스트 스크립트 디렉토리
+  #   command: ["npx", "playwright", "test"]
+  #   depends_on:
+  #     - otel-collector
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    volumes:
+      - ./otel-config.yaml:/etc/otel-config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP/gRPC
+      - "4318:4318" # OTLP/HTTP
+    command:
+      ["--config", "/etc/otel-config.yaml"]
+    restart: unless-stopped
+
+  # Prometheus (Metric)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  # Loki (로그 저장소)
+  loki:
+    image: grafana/loki:2.9.1
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - ./data/loki:/data/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - loki
+    restart: unless-stopped

@@ -1,0 +1,43 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  hostmetrics:  # Host metrics receiver 추가
+    collection_interval: 10s
+    scrapers:
+      cpu: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+      network: {}
+      load: {}
+      processes: {}
+
+
+exporters:
+  prometheusremotewrite:
+    endpoint: "http://localhost:9090/api/v1/write" # Prometheus Remote Write API
+  otlphttp:
+    endpoint: "http://localhost:3100/loki/api/v1/push" # Loki HTTP Push API
+
+processors:
+  batch:
+    timeout: 10s
+  memory_limiter:
+    limit_mib: 4000
+    spike_limit_mib: 500
+    check_interval: 5s
+
+
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch, memory_limiter]
+      exporters: [otlphttp]
+    metrics:
+      receivers: [hostmetrics]
+      processors: [batch, memory_limiter]
+      exporters: [prometheusremotewrite]
