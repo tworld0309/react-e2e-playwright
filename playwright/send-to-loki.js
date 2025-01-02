@@ -1,11 +1,12 @@
 const fs = require('fs');
 const axios = require('axios');
 
+// 환경변수에서 job 이름과 Loki URL 가져오기
+const jobName = process.env.JOB_NAME || 'default-job';
+const lokiUrl = process.env.LOKI_URL || 'http://localhost:3100/loki/api/v1/push';
+
 (async () => {
   try {
-    // Loki 주소
-    const lokiUrl = 'http://192.168.10.1:3100/loki/api/v1/push';
-
     // 로그 파일 읽기
     const logData = fs.readFileSync('playwright-results.log', 'utf-8');
     const logLines = logData.split('\n').filter(line => line.trim() !== '');
@@ -13,7 +14,7 @@ const axios = require('axios');
     // Loki가 수신할 JSON 데이터 생성
     const streams = logLines.map(line => ({
       stream: {
-        job: 'playwright-tests',
+        job: jobName, // 환경변수로 받은 job 이름
         level: 'info',
       },
       values: [
