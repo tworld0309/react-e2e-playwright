@@ -18,3 +18,8 @@ to-do) 테스트 데이터 모아서 그라파나로 모으는 방법
 
 # playwright - otel 연동
 npm install @opentelemetry/sdk-node @opentelemetry/instrumentation @opentelemetry/exporter-trace-otlp-http
+
+
+
+# send to loki
+node send-to-loki.js
