@@ -49,7 +49,42 @@ test.describe('React Counter App', () => {
     });
   });
 
-test.afterEach(async ({}, testInfo: TestInfo) => {
-  const log = `Test: ${testInfo.title}, Status: ${testInfo.status}, Duration: ${testInfo.duration}ms\n`;
-  fs.appendFileSync('playwright-results.log', log);
+let testStartTime;
+
+test.beforeEach(async () => {
+  testStartTime = Date.now();
+});
+
+// 치환 함수 정의
+function sanitizeString(input) {
+  if (!input) return null; // null 값은 그대로 반환
+  return input
+    .replace(/-/g, " - ") // `-` 주변에 공백 추가
+    .replace(/'/g, "&#39;") // 작은따옴표를 HTML 엔티티로 변환
+    .replace(/"/g, "&quot;") // 큰따옴표를 HTML 엔티티로 변환
+    .replace(/[\n\r]/g, " "); // 줄바꿈을 공백으로 치환
+}
+
+test.afterEach(async ({}, testInfo) => {
+  const logEntry = {
+    testName: sanitizeString(testInfo.title),
+    status: testInfo.status,
+    duration: testInfo.duration || 0,
+    startTime: new Date(testStartTime).toISOString(),
+    endTime: new Date(Date.now()).toISOString(),
+    browser: testInfo.project.name,
+    platform: process.platform,
+    error: sanitizeString(testInfo.error ? testInfo.error.message : null),
+    callLog: sanitizeString(
+      testInfo.attachments.find((a) => a.name === "call-log")?.body || null
+    ),
+    screenshot:
+      testInfo.attachments.find((a) => a.name === "screenshot")?.path || null,
+  };
+
+  // JSON.stringify로 안전한 JSON 문자열로 변환 후 저장
+  fs.appendFileSync(
+    "playwright-results/playwright-results.log",
+    JSON.stringify(logEntry) + "\n"
+  );
 });
